@@ -47,8 +47,13 @@ func changeUnderPlatformState(body):
 	
 func _physics_process(delta):
 	
-	applyGravity(delta)
-	
+	applyGravity()
+	movementLogic()
+	slideLogic()
+	jumpLogic()
+	applyMotion()
+
+func movementLogic():
 	#move no faster than maxSpeed
 	motion.x = clamp(motion.x, -maxSpeed, maxSpeed)
 	
@@ -59,13 +64,8 @@ func _physics_process(delta):
 	else:
 		#slow down gradually
 		motion.x = lerp(motion.x, 0, 0.2)
-	
-	slideLogic()
-	jumpLogic()
-	applyMotion()
-
 		
-func applyGravity(delta):
+func applyGravity():
 	motion.y += gravity
 	if motion.y > maxFallSpeed:
 		motion.y = maxFallSpeed
