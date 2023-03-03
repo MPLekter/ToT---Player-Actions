@@ -1,0 +1,39 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://Scripts/PlayerMovement_EliCuayong.gd" type="Script" id=1]
+[ext_resource path="res://Assets/crow.png" type="Texture" id=2]
+
+[sub_resource type="CapsuleShape2D" id=1]
+radius = 16.0
+height = 24.0
+
+[sub_resource type="CapsuleShape2D" id=2]
+radius = 16.0
+height = 0.0
+
+[node name="Player" type="KinematicBody2D"]
+script = ExtResource( 1 )
+
+[node name="Sprite" type="Sprite" parent="."]
+scale = Vector2( 0.1, 0.1 )
+texture = ExtResource( 2 )
+flip_h = true
+
+[node name="StandingCollisionShape" type="CollisionShape2D" parent="."]
+shape = SubResource( 1 )
+
+[node name="SlidingCollisionShape" type="CollisionShape2D" parent="."]
+position = Vector2( 0, 12 )
+shape = SubResource( 2 )
+disabled = true
+
+[node name="Camera2D" type="Camera2D" parent="."]
+current = true
+smoothing_enabled = true
+
+[node name="_TEST" type="Area2D" parent="."]
+monitoring = false
+monitorable = false
+
+[node name="StandingCollisionShape2" type="CollisionShape2D" parent="_TEST"]
+shape = SubResource( 1 )
