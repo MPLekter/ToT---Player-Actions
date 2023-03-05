@@ -36,7 +36,7 @@ var canShoot := true
 var canDrop := false
 
 #onreadys
-onready var bullet = preload("res://Scenes/Bullet.tscn")
+onready var bullet = preload("res://Resources/Bullet.tscn")
 
 #debug related 
 var timestamp = Time.get_datetime_string_from_system()
@@ -64,9 +64,9 @@ func _physics_process(delta):
 	applyMotion()
 	applyGunRotation()
 	shootLogic()
-	dropDownLogic()
+	dropThroughLogic()
 		
-func dropDownLogic():
+func dropThroughLogic():
 	#TODO: refactor to regain collision after drop
 	#TODO: make sure bullets and other stuff can still hit - prepare dedicated layer for ground collisions.
 	if canDrop == true:
@@ -79,11 +79,14 @@ func shootLogic():
 	#TODO: refactor so that changing direction after shoot does not reposition already spawned bullets
 	if Input.is_action_pressed("player_shoot"):
 		if canShoot:
-			var spawnPoint = $GunShape/ShootStartPoint.get_position()
+			var spawnPoint = $GunShape/ShootStartPoint.get_global_position()
 			var newBullet = bullet.instance()
 			newBullet.init(direction, spawnPoint)
-			add_child(newBullet)
-			#newBullet.set_rotation_degrees(90) #TODO: refactor this workaround
+			print_debug(timestamp, " initialized a bullet going ", direction, " @ ", spawnPoint)
+			get_tree().get_root().add_child(newBullet)
+			print_debug(timestamp, " spawned a bullet going ", direction, " @ ", spawnPoint)
+			newBullet.position = spawnPoint
+			print_debug(timestamp, " bullet position is now ", spawnPoint)
 			canShoot = false
 			yield(get_tree().create_timer(shootCoolDown), "timeout")
 			canShoot = true
@@ -94,16 +97,12 @@ func applyGunRotation():
 	match direction:
 		RIGHT:
 			gun.set_rotation_degrees(-90)
-			shootStartPoint.set_position(Vector2(40, 0))
 		LEFT:
 			gun.set_rotation_degrees(90)
-			shootStartPoint.set_position(Vector2(-40, 0))
 		UP:
 			gun.set_rotation_degrees(180)
-			shootStartPoint.set_position(Vector2(0, -40))
 		DOWN:
 			gun.set_rotation_degrees(0)
-			shootStartPoint.set_position(Vector2(0, 40))
 	
 func getDirection():
 	var lastdirection = direction
