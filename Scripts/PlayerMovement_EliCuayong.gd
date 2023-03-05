@@ -69,8 +69,7 @@ func playerSlide():
 	$SlidingCollisionShape.set_disabled(false)
 	$StandingCollisionShape.set_disabled(true)
 	rotateSprite("sliding")
-			
-	
+
 func superjumpLogic():
 	if Input.is_action_just_released("player_superjump_toggle"):
 		superJump = !superJump
@@ -89,11 +88,13 @@ func movementLogic():
 			motion.x -= accelerationForce
 		else:
 			#if not holding movement buttons, slow down
-			slowingLogic(slowingFactor_running)
+			#but only if not currently traversing
+			if not underCeiling:
+				slowingLogic(slowingFactor_running)
 		
-func slowingLogic(factor):
+func slowingLogic(slowingFactor):
 	#slow down gradually
-	motion.x = lerp(motion.x, 0, factor)
+	motion.x = lerp(motion.x, 0, slowingFactor)
 	isSlowing = false
 	playerStandUp()
 		
@@ -110,20 +111,7 @@ func slideLogic():
 	
 	var isMoving = not is_zero_approx(motion.x)
 	
-	#logic without slowing down
-#	if is_on_floor():
-#		if Input.is_action_just_pressed("player_crouch") and isMoving:
-#			print_debug(timestamp, " STATE: begun sliding")
-#			playerSlide()
-#			yield (get_tree().create_timer(slideTimer), "timeout")
-#			if not underCeiling:
-#				print_debug(timestamp, " STATE: finished sliding")
-#				playerStandUp()
-#			else:
-#				print_debug(timestamp, " STATE: trying to stand up but still under a platform!")
-	
 	#logic with slowing down
-
 	if Input.is_action_pressed("player_crouch"): 
 		if is_on_floor() and isMoving and not isSlowing:
 			#Do these once on click
@@ -131,11 +119,10 @@ func slideLogic():
 			var currentSpeed = motion.x
 			while Input.is_action_pressed("player_crouch"):
 				playerSlide()
-				#debug this:
-				print_debug(timestamp, " holding key!")
 #				#Keep checking for this as long as its pressed
 				if not underCeiling:
 					isSlowing = true
+					print_debug(timestamp, " STATE: finished sliding")
 					break
 				else:
 					isSlowing = false
