@@ -1,6 +1,9 @@
 extends KinematicBody2D
 
 const UP := Vector2.UP
+const DOWN := Vector2.DOWN
+const LEFT := Vector2.LEFT
+const RIGHT := Vector2.RIGHT
 
 #jumping related
 export var gravity := 15
@@ -23,6 +26,7 @@ export var slowingFactor_sliding := 0.025
 export var slowingFactor_running := 0.050
 
 var motion := Vector2()
+var direction := Vector2()
 
 
 #debug related 
@@ -31,6 +35,7 @@ var timestamp = Time.get_datetime_string_from_system()
 
 
 func _ready():
+	direction = RIGHT
 	applyTraversePointsLogic()
 	
 func applyTraversePointsLogic():
@@ -44,12 +49,39 @@ func applyTraversePointsLogic():
 		
 func _physics_process(delta):
 	applyGravity()
+	getDirection()
 	movementLogic()
 	slideLogic()
 	jumpLogic()
 	superjumpLogic()
 	applyMotion()
+	applyGunRotation(direction)
 		
+func applyGunRotation(direction):
+	var gun = $GunShape
+	match direction:
+		RIGHT:
+			gun.set_rotation_degrees(-90)
+		LEFT:
+			gun.set_rotation_degrees(90)
+		UP:
+			gun.set_rotation_degrees(180)
+		DOWN:
+			gun.set_rotation_degrees(0)
+	
+func getDirection():
+	var lastdirection = direction
+	if Input.is_action_just_pressed("player_left"):
+		direction = LEFT
+	elif Input.is_action_just_pressed("player_right"):
+		direction = RIGHT
+	elif Input.is_action_just_pressed("player_down"):
+		direction = DOWN
+	elif Input.is_action_just_pressed("player_up"):
+		direction = UP
+	if direction != lastdirection:
+		print_debug(timestamp, direction)
+	
 func changeUnderCeilingState(body):
 	if body == self:
 		print_debug(timestamp, " STATE: underCeiling is now ", !underCeiling)

@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://Scripts/PlayerMovement_EliCuayong.gd" type="Script" id=1]
 [ext_resource path="res://Assets/crow.png" type="Texture" id=2]
@@ -10,6 +10,9 @@ height = 24.0
 [sub_resource type="CapsuleShape2D" id=2]
 radius = 16.0
 height = 0.0
+
+[sub_resource type="RayShape2D" id=3]
+length = 40.0
 
 [node name="Player" type="KinematicBody2D"]
 script = ExtResource( 1 )
@@ -31,9 +34,6 @@ disabled = true
 current = true
 smoothing_enabled = true
 
-[node name="_TEST" type="Area2D" parent="."]
-monitoring = false
-monitorable = false
-
-[node name="StandingCollisionShape2" type="CollisionShape2D" parent="_TEST"]
-shape = SubResource( 1 )
+[node name="GunShape" type="CollisionShape2D" parent="."]
+shape = SubResource( 3 )
+disabled = true
