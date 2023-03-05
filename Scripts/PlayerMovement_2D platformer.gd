@@ -32,6 +32,9 @@ var direction := Vector2()
 export var shootCoolDown := 0.6
 var canShoot := true
 
+#dropping through related
+var canDrop := false
+
 #onreadys
 onready var bullet = preload("res://Scenes/Bullet.tscn")
 
@@ -59,9 +62,19 @@ func _physics_process(delta):
 	jumpLogic()
 	superjumpLogic()
 	applyMotion()
-	applyGunRotation(direction)
+	applyGunRotation()
 	shootLogic()
+	dropDownLogic()
 		
+func dropDownLogic():
+	#TODO: refactor to regain collision after drop
+	#TODO: make sure bullets and other stuff can still hit - prepare dedicated layer for ground collisions.
+	if canDrop == true:
+		if Input.is_action_pressed("player_down") and Input.is_action_just_pressed("player_crouch"):
+				set_collision_layer_bit(2, false)
+				set_collision_mask_bit(2, false)
+	
+			
 func shootLogic():
 	#TODO: refactor so that changing direction after shoot does not reposition already spawned bullets
 	if Input.is_action_pressed("player_shoot"):
@@ -75,7 +88,7 @@ func shootLogic():
 			yield(get_tree().create_timer(shootCoolDown), "timeout")
 			canShoot = true
 			
-func applyGunRotation(direction):
+func applyGunRotation():
 	var gun = $GunShape
 	var shootStartPoint = $GunShape/ShootStartPoint
 	match direction:
@@ -103,7 +116,8 @@ func getDirection():
 	elif Input.is_action_just_pressed("player_up"):
 		direction = UP
 	if direction != lastdirection:
-		print_debug(timestamp, direction)
+		#print_debug(timestamp, direction)
+		pass
 	
 func changeUnderCeilingState(body):
 	if body == self:
@@ -208,3 +222,14 @@ func rotateSprite(doingWhat):
 	elif doingWhat == "standing":
 		$Sprite.set_flip_v(false)
 			
+
+
+func _on_DropThroughCheck_body_entered(body):
+	if body.is_in_group("DROP_THROUGH_LAYER"):
+		canDrop = true
+
+func _on_DropThroughCheck_body_exited(body):
+	if body.is_in_group("DROP_THROUGH_LAYER"):
+		canDrop = false
+		set_collision_layer_bit(2, true)
+		set_collision_mask_bit(2, true)

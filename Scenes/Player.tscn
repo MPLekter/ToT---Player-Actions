@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://Scripts/PlayerMovement_2D platformer.gd" type="Script" id=1]
 [ext_resource path="res://Assets/crow.png" type="Texture" id=2]
@@ -14,7 +14,12 @@ height = 0.0
 [sub_resource type="RayShape2D" id=3]
 length = 40.0
 
-[node name="Player" type="KinematicBody2D"]
+[sub_resource type="RectangleShape2D" id=4]
+extents = Vector2( 20, 9 )
+
+[node name="Player" type="KinematicBody2D" groups=["PLAYER_GROUP"]]
+collision_layer = 7
+collision_mask = 7
 script = ExtResource( 1 )
 
 [node name="Sprite" type="Sprite" parent="."]
@@ -40,6 +45,13 @@ disabled = true
 
 [node name="ShootStartPoint" type="Position2D" parent="GunShape"]
 
-[node name="Sprite" type="Sprite" parent="GunShape/ShootStartPoint"]
-scale = Vector2( 0.01, 0.01 )
-texture = ExtResource( 2 )
+[node name="DropThroughCheck" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DropThroughCheck"]
+position = Vector2( 1, 24 )
+shape = SubResource( 4 )
+
+[connection signal="body_entered" from="DropThroughCheck" to="." method="_on_DropThroughCheck_body_entered"]
+[connection signal="body_exited" from="DropThroughCheck" to="." method="_on_DropThroughCheck_body_exited"]
