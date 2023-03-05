@@ -60,6 +60,13 @@ player_down={
  ]
 }
 
+[layer_names]
+
+2d_physics/layer_1="Player_related"
+2d_physics/layer_2="Non-passable objects"
+2d_physics/layer_3="Drop-through objects"
+2d_physics/layer_4="Enemy-related"
+
 [physics]
 
 common/enable_pause_aware_picking=true
