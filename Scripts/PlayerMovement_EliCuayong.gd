@@ -13,16 +13,20 @@ export var superJumpMultiplier := 1.99
 
 #slide related 
 export var slideTimer := 2.2
-var underPlatform := false
+var underCeiling := false
+var isSlowing := false
 
 #movement related
 export var maxSpeed := 100
 export var accelerationForce := 20
+export var slowingFactor_sliding := 0.025
+export var slowingFactor_running := 0.050
+
 var motion := Vector2()
+
 
 #debug related 
 var timestamp = Time.get_datetime_string_from_system()
-
 
 
 
@@ -33,13 +37,12 @@ func applyTraversePointsLogic():
 	var allTraversePoints = get_tree().get_nodes_in_group("TraversePoint")
 	print_debug("There are ", allTraversePoints.size(), " traverse points in ", get_tree().get_current_scene().get_name())
 	for traversePoint in allTraversePoints:
-		traversePoint.connect("body_entered", self, "changeUnderPlatformState")
-		traversePoint.connect("body_exited", self, "changeUnderPlatformState")
+		traversePoint.connect("body_entered", self, "changeUnderCeilingState")
+		traversePoint.connect("body_exited", self, "changeUnderCeilingState")
 		#print_debug(traversePoint, " connected my signals")
-		#print_debug(traversePoint.is_connected("body_entered", self, "changeUnderPlatformState"))
+		#print_debug(traversePoint.is_connected("body_entered", self, "changeUnderCeilingState"))
 		
 func _physics_process(delta):
-	
 	applyGravity()
 	movementLogic()
 	slideLogic()
@@ -47,12 +50,14 @@ func _physics_process(delta):
 	superjumpLogic()
 	applyMotion()
 		
-func changeUnderPlatformState(body):
+func changeUnderCeilingState(body):
 	if body == self:
-		print_debug(timestamp, " STATE: under platform is now ", !underPlatform)
-		underPlatform = !underPlatform
-		if underPlatform == false:
+		print_debug(timestamp, " STATE: underCeiling is now ", !underCeiling)
+		underCeiling = !underCeiling
+		if underCeiling == false:
 			playerStandUp()
+		else:
+			playerSlide()
 
 			
 func playerStandUp():
@@ -72,16 +77,25 @@ func superjumpLogic():
 		print_debug(timestamp, " superjump is now ", superJump)
 	
 func movementLogic():
-	#move no faster than maxSpeed
-	motion.x = clamp(motion.x, -maxSpeed, maxSpeed)
-	
-	if Input.is_action_pressed("player_right"):
-		motion.x += accelerationForce
-	elif Input.is_action_pressed("player_left"):
-		motion.x -= accelerationForce
+	if isSlowing:
+		slowingLogic(slowingFactor_sliding)
 	else:
-		#slow down gradually
-		motion.x = lerp(motion.x, 0, 0.2)
+		#move no faster than maxSpeed
+		motion.x = clamp(motion.x, -maxSpeed, maxSpeed)
+		
+		if Input.is_action_pressed("player_right"):
+			motion.x += accelerationForce
+		elif Input.is_action_pressed("player_left"):
+			motion.x -= accelerationForce
+		else:
+			#if not holding movement buttons, slow down
+			slowingLogic(slowingFactor_running)
+		
+func slowingLogic(factor):
+	#slow down gradually
+	motion.x = lerp(motion.x, 0, factor)
+	isSlowing = false
+	playerStandUp()
 		
 func applyGravity():
 	motion.y += gravity
@@ -92,18 +106,42 @@ func slideLogic():
 	#use smaller collision shape
 	#when holding action, start slowing down gradually until no motion at all
 	#keep sliding position
-	#if underPlatform, don't do that, just keep sliding
+	#if underCeiling, don't do that, just keep sliding
+	
 	var isMoving = not is_zero_approx(motion.x)
-	if is_on_floor():
-		if Input.is_action_just_pressed("player_crouch") and isMoving:
+	
+	#logic without slowing down
+#	if is_on_floor():
+#		if Input.is_action_just_pressed("player_crouch") and isMoving:
+#			print_debug(timestamp, " STATE: begun sliding")
+#			playerSlide()
+#			yield (get_tree().create_timer(slideTimer), "timeout")
+#			if not underCeiling:
+#				print_debug(timestamp, " STATE: finished sliding")
+#				playerStandUp()
+#			else:
+#				print_debug(timestamp, " STATE: trying to stand up but still under a platform!")
+	
+	#logic with slowing down
+
+	if Input.is_action_pressed("player_crouch"): 
+		if is_on_floor() and isMoving and not isSlowing:
+			#Do these once on click
 			print_debug(timestamp, " STATE: begun sliding")
-			playerSlide()
-			yield (get_tree().create_timer(slideTimer), "timeout")
-			if not underPlatform:
-				print_debug(timestamp, " STATE: finished sliding")
-				playerStandUp()
-			else:
-				print_debug(timestamp, " STATE: trying to stand up but still under a platform!")
+			var currentSpeed = motion.x
+			while Input.is_action_pressed("player_crouch"):
+				playerSlide()
+				#debug this:
+				print_debug(timestamp, " holding key!")
+#				#Keep checking for this as long as its pressed
+				if not underCeiling:
+					isSlowing = true
+					break
+				else:
+					isSlowing = false
+					print_debug(timestamp, " STATE: trying to stand up but still under a platform!")
+					break
+
 			
 func jumpLogic():
 	#2 phase animation
