@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=2]
 
-[ext_resource path="res://Scripts/PlayerMovement_EliCuayong.gd" type="Script" id=1]
+[ext_resource path="res://Scripts/PlayerMovement_2D platformer.gd" type="Script" id=1]
 [ext_resource path="res://Assets/crow.png" type="Texture" id=2]
 
 [sub_resource type="CapsuleShape2D" id=1]

@@ -131,9 +131,10 @@ func slowingLogic(slowingFactor):
 	playerStandUp()
 		
 func applyGravity():
-	motion.y += gravity
-	if motion.y > maxFallSpeed:
-		motion.y = maxFallSpeed
+	if not is_on_floor(): #turn this line off if should slide down every slope.
+		motion.y += gravity
+		if motion.y > maxFallSpeed:
+			motion.y = maxFallSpeed
 
 func slideLogic():
 	#use smaller collision shape
@@ -147,7 +148,7 @@ func slideLogic():
 	if Input.is_action_pressed("player_crouch"): 
 		if is_on_floor() and isMoving and not isSlowing:
 			#Do these once on click
-			print_debug(timestamp, " STATE: begun sliding")
+			print_debug(timestamp, " STATE: started sliding")
 			var currentSpeed = motion.x
 			while Input.is_action_pressed("player_crouch"):
 				playerSlide()
