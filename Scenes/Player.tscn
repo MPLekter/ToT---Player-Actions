@@ -37,3 +37,6 @@ smoothing_enabled = true
 [node name="GunShape" type="CollisionShape2D" parent="."]
 shape = SubResource( 3 )
 disabled = true
+
+[node name="ShootStartPoint" type="Position2D" parent="GunShape"]
+position = Vector2( 0, 40 )

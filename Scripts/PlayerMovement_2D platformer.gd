@@ -28,11 +28,15 @@ export var slowingFactor_running := 0.050
 var motion := Vector2()
 var direction := Vector2()
 
+#shooting related
+export var shootCoolDown := 0.8
+var canShoot := true
+
+#onreadys
+onready var bullet = preload("res://Scenes/Bullet.tscn")
 
 #debug related 
 var timestamp = Time.get_datetime_string_from_system()
-
-
 
 func _ready():
 	direction = RIGHT
@@ -56,7 +60,20 @@ func _physics_process(delta):
 	superjumpLogic()
 	applyMotion()
 	applyGunRotation(direction)
+	shootLogic()
 		
+func shootLogic():
+	#TODO: refactor so that changing direction after shoot does not reposition already spawned bullets
+	if Input.is_action_just_pressed("player_shoot"):
+		if canShoot:
+			var shootStartPoint = $GunShape/ShootStartPoint
+			var newBullet = bullet.instance()
+			shootStartPoint.add_child(newBullet)
+			newBullet.set_rotation_degrees(90) #TODO: refactor this workaround
+			canShoot = false
+			yield(get_tree().create_timer(shootCoolDown), "timeout")
+			canShoot = true
+			
 func applyGunRotation(direction):
 	var gun = $GunShape
 	match direction:
@@ -143,7 +160,6 @@ func slideLogic():
 	#if underCeiling, don't do that, just keep sliding
 	
 	var isMoving = not is_zero_approx(motion.x)
-	
 	#logic with slowing down
 	if Input.is_action_pressed("player_crouch"): 
 		if is_on_floor() and isMoving and not isSlowing:
