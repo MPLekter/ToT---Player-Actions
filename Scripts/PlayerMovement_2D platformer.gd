@@ -29,7 +29,7 @@ var motion := Vector2()
 var direction := Vector2()
 
 #shooting related
-export var shootCoolDown := 0.8
+export var shootCoolDown := 0.6
 var canShoot := true
 
 #onreadys
@@ -64,27 +64,33 @@ func _physics_process(delta):
 		
 func shootLogic():
 	#TODO: refactor so that changing direction after shoot does not reposition already spawned bullets
-	if Input.is_action_just_pressed("player_shoot"):
+	if Input.is_action_pressed("player_shoot"):
 		if canShoot:
-			var shootStartPoint = $GunShape/ShootStartPoint
+			var spawnPoint = $GunShape/ShootStartPoint.get_position()
 			var newBullet = bullet.instance()
-			shootStartPoint.add_child(newBullet)
-			newBullet.set_rotation_degrees(90) #TODO: refactor this workaround
+			newBullet.init(direction, spawnPoint)
+			add_child(newBullet)
+			#newBullet.set_rotation_degrees(90) #TODO: refactor this workaround
 			canShoot = false
 			yield(get_tree().create_timer(shootCoolDown), "timeout")
 			canShoot = true
 			
 func applyGunRotation(direction):
 	var gun = $GunShape
+	var shootStartPoint = $GunShape/ShootStartPoint
 	match direction:
 		RIGHT:
 			gun.set_rotation_degrees(-90)
+			shootStartPoint.set_position(Vector2(40, 0))
 		LEFT:
 			gun.set_rotation_degrees(90)
+			shootStartPoint.set_position(Vector2(-40, 0))
 		UP:
 			gun.set_rotation_degrees(180)
+			shootStartPoint.set_position(Vector2(0, -40))
 		DOWN:
 			gun.set_rotation_degrees(0)
+			shootStartPoint.set_position(Vector2(0, 40))
 	
 func getDirection():
 	var lastdirection = direction

@@ -39,4 +39,7 @@ shape = SubResource( 3 )
 disabled = true
 
 [node name="ShootStartPoint" type="Position2D" parent="GunShape"]
-position = Vector2( 0, 40 )
+
+[node name="Sprite" type="Sprite" parent="GunShape/ShootStartPoint"]
+scale = Vector2( 0.01, 0.01 )
+texture = ExtResource( 2 )
