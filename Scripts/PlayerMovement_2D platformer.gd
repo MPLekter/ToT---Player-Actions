@@ -11,8 +11,13 @@ export var maxFallSpeed := 140
 export var jumpForce := 500
 export var maxJumps := 2
 var jumps := 0
+var canDoubleJump := false
+
 export var superJump := false
 export var superJumpMultiplier := 1.99
+
+export var coyote_time := false
+export var coyote_time_value := 0.4
 
 #slide related 
 export var slideTimer := 2.2
@@ -67,8 +72,6 @@ func _physics_process(delta):
 	dropThroughLogic()
 		
 func dropThroughLogic():
-	#TODO: refactor to regain collision after drop
-	#TODO: make sure bullets and other stuff can still hit - prepare dedicated layer for ground collisions.
 	if canDrop == true:
 		if Input.is_action_pressed("player_down") and Input.is_action_just_pressed("player_crouch"):
 				set_collision_layer_bit(2, false)
@@ -76,7 +79,6 @@ func dropThroughLogic():
 	
 			
 func shootLogic():
-	#TODO: refactor so that changing direction after shoot does not reposition already spawned bullets
 	if Input.is_action_pressed("player_shoot"):
 		if canShoot:
 			var spawnPoint = $GunShape/ShootStartPoint.get_global_position()
@@ -182,35 +184,51 @@ func slideLogic():
 	#logic with slowing down
 	if Input.is_action_pressed("player_crouch"): 
 		if is_on_floor() and isMoving and not isSlowing:
-			#Do these once on click
-			print_debug(timestamp, " STATE: started sliding")
+			#print_debug(timestamp, " STATE: started sliding")
 			var currentSpeed = motion.x
 			while Input.is_action_pressed("player_crouch"):
 				playerSlide()
 #				#Keep checking for this as long as its pressed
 				if not underCeiling:
 					isSlowing = true
-					print_debug(timestamp, " STATE: finished sliding")
+					#print_debug(timestamp, " STATE: finished sliding")
 					break
 				else:
 					isSlowing = false
-					print_debug(timestamp, " STATE: trying to stand up but still under a platform!")
+					#print_debug(timestamp, " STATE: trying to stand up but still under a platform!")
 					break
 
 			
 func jumpLogic():
 	#2 phase animation
 	#full mobility while in air
-	if is_on_floor():
-		jumps = 0  
-	if Input.is_action_just_pressed("player_jump"): 
-		if jumps <= maxJumps:
-			if not superJump:
-				jumps += 1 #double jump if not double jumped already
+	
+	#You can jump if you are on the floor, in coyote time or still have double jump
+	if is_on_floor() or coyote_time == true:
+		jumps = 0
+		
+	if Input.is_action_just_pressed("player_jump"):
+		#super jump logic
+		if is_on_floor() and superJump == true:
+			motion.y = -jumpForce * superJumpMultiplier
+			jumps = maxJumps + 1
+			canDoubleJump = false
+		#floor jump logic
+		elif is_on_floor() and superJump != true:
+			motion.y = -jumpForce
+			jumps += 1 
+			canDoubleJump = true
+		#coyote jump logic
+		elif !is_on_floor() and coyote_time == true: 
+			motion.y = -jumpForce
+			jumps += 1
+			canDoubleJump = true
+		#double jump logic
+		elif !is_on_floor() and coyote_time != true and canDoubleJump:
+			if jumps <= maxJumps:
 				motion.y = -jumpForce
-			else:
-				jumps = maxJumps + 1 #no double jump for superJump
-				motion.y = -jumpForce * superJumpMultiplier
+				jumps += 1 
+				canDoubleJump = false
 
 func applyMotion():
 	motion = move_and_slide(motion, UP)
@@ -228,7 +246,14 @@ func _on_DropThroughCheck_body_entered(body):
 		canDrop = true
 
 func _on_DropThroughCheck_body_exited(body):
+	#Toggle collisions off with drop through objects
 	if body.is_in_group("DROP_THROUGH_LAYER"):
 		canDrop = false
 		set_collision_layer_bit(2, true)
 		set_collision_mask_bit(2, true)
+	#Enable jumping when leaving any bodies
+	coyote_time = true
+	print_debug(timestamp, " time to coyote")
+	yield(get_tree().create_timer(coyote_time_value), "timeout")
+	coyote_time = false
+	print_debug(timestamp, " time to coyote is now over")
