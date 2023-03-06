@@ -1,5 +1,6 @@
 extends KinematicBody2D
 
+#constants
 const UP := Vector2.UP
 const DOWN := Vector2.DOWN
 const LEFT := Vector2.LEFT
@@ -23,6 +24,7 @@ export var coyote_time_value := 0.4
 export var slideTimer := 2.2
 var underCeiling := false
 var isSlowing := false
+var isSliding := false
 
 #movement related
 export var maxSpeed := 100
@@ -36,12 +38,23 @@ var direction := Vector2()
 #shooting related
 export var shootCoolDown := 0.6
 var canShoot := true
+onready var bullet = preload("res://Resources/Bullet.tscn")
 
 #dropping through related
 var canDrop := false
 
-#onreadys
-onready var bullet = preload("res://Resources/Bullet.tscn")
+#animation related
+onready var ani = $AnimatedSprite
+
+#state logic related
+const possibleStates = ["IDLE", "RUNNING", "JUMP_UP", "JUMP_DOWN", "SLIDING"]
+var IDLE = possibleStates[0]
+var RUNNING = possibleStates[1]
+var JUMP_UP = possibleStates[2]
+var JUMP_DOWN = possibleStates[3]
+var SLIDING = possibleStates[4]
+
+var playerState = IDLE
 
 #debug related 
 var timestamp = Time.get_datetime_string_from_system()
@@ -70,14 +83,47 @@ func _physics_process(delta):
 	applyGunRotation()
 	shootLogic()
 	dropThroughLogic()
+	
+	handlePlayerState()
+	handlePlayerAnimation(playerState)
 		
+
+func handlePlayerState():
+	#idling state TODO: turn it on faster
+	if is_on_floor() and is_zero_approx(motion.x):
+		playerState = IDLE
+	#running state
+	elif is_on_floor() and !is_zero_approx(motion.x) and isSliding != true:
+		playerState = RUNNING
+	#sliding state
+	elif is_on_floor() and !is_zero_approx(motion.x) and isSliding == true:
+		playerState = SLIDING
+	#jumping state TODO: check if going up or down, apply animation
+	elif not is_on_floor() and !is_zero_approx(motion.y):
+		playerState = JUMP_UP
+		
+func handlePlayerAnimation(playerState):
+	#play anim
+	ani.play(playerState)
+	#direction logic
+	if direction == RIGHT:
+		ani.set_flip_h(false)
+	elif direction == LEFT:
+		ani.set_flip_h(true)
+	#special logic for sliding rotation
+	if playerState == SLIDING:
+		ani.set_rotation_degrees(-80)
+		ani.set_position(Vector2(-15, 15))
+	else:
+		ani.set_rotation_degrees(0)
+		ani.set_position(Vector2(0, -8))
+	
 func dropThroughLogic():
 	if canDrop == true:
 		if Input.is_action_pressed("player_down") and Input.is_action_just_pressed("player_crouch"):
 				set_collision_layer_bit(2, false)
 				set_collision_mask_bit(2, false)
-	
-			
+
 func shootLogic():
 	if Input.is_action_pressed("player_shoot"):
 		if canShoot:
@@ -133,12 +179,13 @@ func changeUnderCeilingState(body):
 func playerStandUp():
 	$SlidingCollisionShape.set_disabled(true)
 	$StandingCollisionShape.set_disabled(false)
-	rotateSprite("standing")
+	#rotateSprite("standing") not needed anymore
+
 
 func playerSlide():
 	$SlidingCollisionShape.set_disabled(false)
 	$StandingCollisionShape.set_disabled(true)
-	rotateSprite("sliding")
+	#rotateSprite("sliding")not needed anymore
 
 func superjumpLogic():
 	if Input.is_action_just_released("player_superjump_toggle"):
@@ -188,6 +235,7 @@ func slideLogic():
 			var currentSpeed = motion.x
 			while Input.is_action_pressed("player_crouch"):
 				playerSlide()
+				isSliding = true
 #				#Keep checking for this as long as its pressed
 				if not underCeiling:
 					isSlowing = true
@@ -197,6 +245,9 @@ func slideLogic():
 					isSlowing = false
 					#print_debug(timestamp, " STATE: trying to stand up but still under a platform!")
 					break
+	if !Input.is_action_pressed("player_crouch") and not underCeiling:
+		isSliding = false
+				
 
 			
 func jumpLogic():
@@ -233,13 +284,11 @@ func jumpLogic():
 func applyMotion():
 	motion = move_and_slide(motion, UP)
 
-func rotateSprite(doingWhat):
-	if doingWhat == "sliding":
-		$Sprite.set_flip_v(true)
-	elif doingWhat == "standing":
-		$Sprite.set_flip_v(false)
-			
-
+#func rotateSprite(doingWhat): #not needed anymore
+#	if doingWhat == "sliding":
+#		$Sprite.set_flip_v(true)
+#	elif doingWhat == "standing":
+#		$Sprite.set_flip_v(false)
 
 func _on_DropThroughCheck_body_entered(body):
 	if body.is_in_group("DROP_THROUGH_LAYER"):
