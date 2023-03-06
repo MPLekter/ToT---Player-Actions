@@ -29,8 +29,8 @@ var isSliding := false
 #movement related
 export var maxSpeed := 100
 export var accelerationForce := 20
-export var slowingFactor_sliding := 0.025
-export var slowingFactor_running := 0.050
+export var slowingFactor_sliding := 0.030
+export var slowingFactor_running := 1.000
 
 var motion := Vector2()
 var direction := Vector2()
@@ -179,13 +179,11 @@ func changeUnderCeilingState(body):
 func playerStandUp():
 	$SlidingCollisionShape.set_disabled(true)
 	$StandingCollisionShape.set_disabled(false)
-	#rotateSprite("standing") not needed anymore
 
 
 func playerSlide():
 	$SlidingCollisionShape.set_disabled(false)
 	$StandingCollisionShape.set_disabled(true)
-	#rotateSprite("sliding")not needed anymore
 
 func superjumpLogic():
 	if Input.is_action_just_released("player_superjump_toggle"):
@@ -211,6 +209,8 @@ func movementLogic():
 		
 func slowingLogic(slowingFactor):
 	#slow down gradually
+	var currentMotionX = motion.x
+	var idleTreshold
 	motion.x = lerp(motion.x, 0, slowingFactor)
 	isSlowing = false
 	playerStandUp()
