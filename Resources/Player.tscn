@@ -1,6 +1,7 @@
-[gd_scene load_steps=32 format=2]
+[gd_scene load_steps=33 format=2]
 
 [ext_resource path="res://Scripts/PlayerMovement_2D platformer.gd" type="Script" id=1]
+[ext_resource path="res://Assets/laserRed01.png" type="Texture" id=2]
 [ext_resource path="res://Assets/PrototypeHero.png" type="Texture" id=3]
 
 [sub_resource type="AtlasTexture" id=5]
@@ -154,7 +155,7 @@ script = ExtResource( 1 )
 position = Vector2( 0, -8 )
 frames = SubResource( 28 )
 animation = "IDLE"
-frame = 1
+frame = 2
 playing = true
 
 [node name="StandingCollisionShape" type="CollisionShape2D" parent="." groups=["PLAYER_GROUP"]]
@@ -177,6 +178,11 @@ disabled = true
 
 [node name="ShootStartPoint" type="Position2D" parent="GunShape" groups=["PLAYER_GROUP"]]
 position = Vector2( 0, 41 )
+
+[node name="GunSprite" type="Sprite" parent="GunShape/ShootStartPoint"]
+modulate = Color( 1, 1, 1, 0.258824 )
+rotation = 3.14159
+texture = ExtResource( 2 )
 
 [node name="DropThroughCheck" type="Area2D" parent="." groups=["PLAYER_GROUP"]]
 collision_layer = 4

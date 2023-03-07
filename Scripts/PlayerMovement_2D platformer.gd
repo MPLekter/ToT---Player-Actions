@@ -134,9 +134,10 @@ func handlePlayerAnimation(playerState):
 	
 func dropThroughLogic():
 	if canDrop == true:
-		if Input.is_action_pressed("player_down") and Input.is_action_just_pressed("player_crouch"):
+		while Input.is_action_pressed("player_down") and Input.is_action_just_pressed("player_crouch"):
 				set_collision_layer_bit(2, false)
 				set_collision_mask_bit(2, false)
+				break
 
 func shootLogic():
 	if Input.is_action_pressed("player_shoot"):
