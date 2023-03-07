@@ -169,18 +169,16 @@ func changeisTraversingState(body):
 		print_debug(timestamp, " STATE: isTraversing is now ", !isTraversing)
 		isTraversing = !isTraversing
 		if isTraversing == false:
-			playerStandUp()
+			playerCollisionStandUp()
 		else:
 			traverseMotionValue = motion.x
-			playerSlide()
+			playerCollisionSlide()
 
-			
-func playerStandUp():
+func playerCollisionStandUp():
 	$SlidingCollisionShape.set_disabled(true)
 	$StandingCollisionShape.set_disabled(false)
 
-
-func playerSlide():
+func playerCollisionSlide():
 	$SlidingCollisionShape.set_disabled(false)
 	$StandingCollisionShape.set_disabled(true)
 
@@ -212,7 +210,7 @@ func slowingLogic(slowingFactor):
 	#slow down gradually
 	motion.x = lerp(motion.x, 0, slowingFactor)
 	isSlowing = false
-	playerStandUp()
+	playerCollisionStandUp()
 		
 func applyGravity():
 	if not is_on_floor(): #turn this line off if should slide down every slope.
@@ -232,7 +230,7 @@ func slideLogic():
 		if is_on_floor() and isMoving and not isSlowing:
 			#print_debug(timestamp, " STATE: started sliding")
 			while Input.is_action_pressed("player_crouch"):
-				playerSlide()
+				playerCollisionSlide()
 				isSliding = true
 #				#Keep checking for this as long as its pressed
 				if not isTraversing:
@@ -283,12 +281,6 @@ func jumpLogic():
 func applyMotion():
 	motion = move_and_slide(motion, UP)
 
-#func rotateSprite(doingWhat): #not needed anymore
-#	if doingWhat == "sliding":
-#		$Sprite.set_flip_v(true)
-#	elif doingWhat == "standing":
-#		$Sprite.set_flip_v(false)
-
 func _on_DropThroughCheck_body_entered(body):
 	if body.is_in_group("DROP_THROUGH_LAYER"):
 		canDrop = true
@@ -301,7 +293,7 @@ func _on_DropThroughCheck_body_exited(body):
 		set_collision_mask_bit(2, true)
 	#Enable jumping when leaving any bodies
 	coyote_time = true
-	print_debug(timestamp, " time to coyote")
+	#print_debug(timestamp, " time to coyote")
 	yield(get_tree().create_timer(coyote_time_value), "timeout")
 	coyote_time = false
-	print_debug(timestamp, " time to coyote is now over")
+	#print_debug(timestamp, " time to coyote is now over")
