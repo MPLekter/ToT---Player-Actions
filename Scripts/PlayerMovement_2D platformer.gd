@@ -100,15 +100,13 @@ func handlePlayerCollisionShape():
 			
 func handlePlayerState():
 	#idling state 
-	if is_on_floor() and is_zero_approx(motion.x) and isSliding != true and isTraversing != true:
+	if is_on_floor() and motion.x == 0 and isSliding != true and isTraversing != true:
 		playerState = IDLE
 	#running state
-	elif is_on_floor() and motion.x > 0.05 and isSliding != true and isTraversing != true:
-		playerState = RUNNING
-	elif is_on_floor() and motion.x < -0.05 and isSliding != true and isTraversing != true:
+	elif is_on_floor() and motion.x != 0 and isSliding != true and isTraversing != true:
 		playerState = RUNNING
 	#sliding state
-	elif is_on_floor() and isSliding == true:
+	elif is_on_floor() and isSliding == true or isTraversing == true:
 		playerState = SLIDING
 	#jumping state TODO: check if going up or down, apply animation
 	elif not is_on_floor() and !is_zero_approx(motion.y):
