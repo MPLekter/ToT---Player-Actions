@@ -89,7 +89,7 @@ func _physics_process(delta):
 
 func handlePlayerState():
 	#idling state 
-	if is_on_floor() and is_zero_approx(motion.x):
+	if is_on_floor() and is_zero_approx(motion.x) and isSliding != true and isTraversing != true:
 		playerState = IDLE
 	#running state
 	elif is_on_floor() and !is_zero_approx(motion.x) and isSliding != true:
@@ -164,7 +164,7 @@ func getDirection():
 		#print_debug(timestamp, direction)
 		pass
 	
-func changeisTraversingState(body):
+func changeisTraversingState(body): #TODO: something is off here. It keeps turning on and off too much 
 	if body == self:
 		print_debug(timestamp, " STATE: isTraversing is now ", !isTraversing)
 		isTraversing = !isTraversing
@@ -236,12 +236,13 @@ func slideLogic():
 				if not isTraversing:
 					isSlowing = true
 					#print_debug(timestamp, " STATE: finished sliding")
-					break
+					#break
 				else:
 					#keep current speed. don't accelerate, don't slow down.
 					isSlowing = false
 					#print_debug(timestamp, " STATE: trying to stand up but still under a platform!")
-					break
+					#break
+				break
 	if !Input.is_action_pressed("player_crouch") and not isTraversing:
 		isSliding = false
 				

@@ -6,10 +6,10 @@
 [ext_resource path="res://Resources/Greybox_Tileset.tres" type="TileSet" id=4]
 
 [sub_resource type="RectangleShape2D" id=2]
-extents = Vector2( 40, 26.5 )
+extents = Vector2( 56, 8 )
 
 [sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 94.5, 26.5 )
+extents = Vector2( 94.5, 15 )
 
 [node name="Node2D" type="Node2D"]
 
@@ -39,29 +39,46 @@ position = Vector2( 49, 282 )
 
 [node name="TraversePoint" parent="TraversePoints" instance=ExtResource( 1 )]
 position = Vector2( 241, 279 )
-__meta__ = {
-"_edit_lock_": true
-}
 
 [node name="CollisionShape2D" parent="TraversePoints/TraversePoint" index="0"]
-position = Vector2( -1, 16.5 )
+position = Vector2( 15, 25 )
 shape = SubResource( 2 )
 
 [node name="TraversePoint2" parent="TraversePoints" instance=ExtResource( 1 )]
 position = Vector2( 1009, 115 )
-__meta__ = {
-"_edit_lock_": true
-}
 
 [node name="CollisionShape2D" parent="TraversePoints/TraversePoint2" index="0"]
-position = Vector2( 47.5, 16.5 )
+position = Vector2( 47.5, 28 )
 shape = SubResource( 1 )
 
 [node name="TraversePoint4" parent="TraversePoints" instance=ExtResource( 1 )]
 position = Vector2( 909, 371 )
-__meta__ = {
-"_edit_lock_": true
-}
+
+[node name="CollisionShape2D" parent="TraversePoints/TraversePoint4" index="0"]
+position = Vector2( 3, 28 )
+
+[node name="EDITOR-ONLY" type="Node" parent="."]
+
+[node name="warning traverse point logic" type="Label" parent="EDITOR-ONLY"]
+modulate = Color( 1, 0.129412, 0.129412, 1 )
+margin_left = 760.0
+margin_top = 448.0
+margin_right = 1051.0
+margin_bottom = 513.0
+text = "Warning!
+A Traverse point in place like this
+will suck player in, leaving no chance to leave
+07-03-2023"
+
+[node name="todo glitchy movement and graphics here" type="Label" parent="EDITOR-ONLY"]
+modulate = Color( 1, 0.129412, 0.129412, 1 )
+margin_left = 8.0
+margin_top = 320.0
+margin_right = 333.0
+margin_bottom = 385.0
+text = "Something is off with movement and graphics here
+07-03-2023"
 
 [editable path="TraversePoints/TraversePoint"]
 [editable path="TraversePoints/TraversePoint2"]
+[editable path="TraversePoints/TraversePoint4"]
