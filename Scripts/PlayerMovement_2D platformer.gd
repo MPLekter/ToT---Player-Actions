@@ -103,10 +103,12 @@ func handlePlayerState():
 	if is_on_floor() and is_zero_approx(motion.x) and isSliding != true and isTraversing != true:
 		playerState = IDLE
 	#running state
-	elif is_on_floor() and !is_zero_approx(motion.x) and isSliding != true:
+	elif is_on_floor() and motion.x > 0.05 and isSliding != true and isTraversing != true:
+		playerState = RUNNING
+	elif is_on_floor() and motion.x < -0.05 and isSliding != true and isTraversing != true:
 		playerState = RUNNING
 	#sliding state
-	elif is_on_floor() and !is_zero_approx(motion.x) and isSliding == true:
+	elif is_on_floor() and isSliding == true:
 		playerState = SLIDING
 	#jumping state TODO: check if going up or down, apply animation
 	elif not is_on_floor() and !is_zero_approx(motion.y):
@@ -242,12 +244,12 @@ func slideLogic():
 				if not isTraversing:
 					isSlowing = true
 					#print_debug(timestamp, " STATE: finished sliding")
-					#break
+					break
 				else:
 					#keep current speed. don't accelerate, don't slow down.
 					isSlowing = false
 					#print_debug(timestamp, " STATE: trying to stand up but still under a platform!")
-					#break
+					break
 				break
 	if !Input.is_action_pressed("player_crouch") and not isTraversing:
 		isSliding = false
