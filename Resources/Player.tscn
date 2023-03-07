@@ -153,7 +153,7 @@ script = ExtResource( 1 )
 position = Vector2( 0, -8 )
 frames = SubResource( 28 )
 animation = "IDLE"
-frame = 4
+frame = 2
 playing = true
 
 [node name="StandingCollisionShape" type="CollisionShape2D" parent="." groups=["PLAYER_GROUP"]]

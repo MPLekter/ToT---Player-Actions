@@ -74,6 +74,9 @@ func applyTraversePointsLogic():
 func _physics_process(delta):
 	applyGravity()
 	getDirection()
+	
+	handlePlayerCollisionShape()
+	
 	movementLogic()
 	slideLogic()
 	jumpLogic()
@@ -86,7 +89,15 @@ func _physics_process(delta):
 	handlePlayerState()
 	handlePlayerAnimation(playerState)
 		
-
+func handlePlayerCollisionShape():
+	if isTraversing:
+		playerCollisionSlide()
+	elif !isTraversing:
+		if Input.is_action_pressed("player_crouch"):
+			playerCollisionSlide()
+		else:
+			playerCollisionStandUp()
+			
 func handlePlayerState():
 	#idling state 
 	if is_on_floor() and is_zero_approx(motion.x) and isSliding != true and isTraversing != true:
@@ -168,13 +179,10 @@ func changeisTraversingState(body): #TODO: something is off here. It keeps turni
 	if body == self:
 		print_debug(timestamp, " STATE: isTraversing is now ", !isTraversing)
 		isTraversing = !isTraversing
-		if isTraversing == false:
-			playerCollisionStandUp()
-		else:
+		if isTraversing == true:
 			traverseMotionValue = motion.x
-			playerCollisionSlide()
 
-func playerCollisionStandUp():
+func playerCollisionStandUp(): 
 	$SlidingCollisionShape.set_disabled(true)
 	$StandingCollisionShape.set_disabled(false)
 
@@ -210,7 +218,6 @@ func slowingLogic(slowingFactor):
 	#slow down gradually
 	motion.x = lerp(motion.x, 0, slowingFactor)
 	isSlowing = false
-	playerCollisionStandUp()
 		
 func applyGravity():
 	if not is_on_floor(): #turn this line off if should slide down every slope.
@@ -230,7 +237,6 @@ func slideLogic():
 		if is_on_floor() and isMoving and not isSlowing:
 			#print_debug(timestamp, " STATE: started sliding")
 			while Input.is_action_pressed("player_crouch"):
-				playerCollisionSlide()
 				isSliding = true
 #				#Keep checking for this as long as its pressed
 				if not isTraversing:
