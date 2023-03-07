@@ -13,7 +13,7 @@ extents = Vector2( 94.5, 26.5 )
 
 [node name="Node2D" type="Node2D"]
 
-[node name="TileMap_Non-passable objects" type="TileMap" parent="."]
+[node name="TileMap_Non-passable objects" type="TileMap" parent="." groups=["NON-PASSABLE_LAYER"]]
 z_index = -1
 tile_set = ExtResource( 4 )
 cell_size = Vector2( 32, 32 )

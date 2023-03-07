@@ -129,11 +129,11 @@ func shootLogic():
 			var spawnPoint = $GunShape/ShootStartPoint.get_global_position()
 			var newBullet = bullet.instance()
 			newBullet.init(direction, spawnPoint)
-			print_debug(timestamp, " initialized a bullet going ", direction, " @ ", spawnPoint)
+			#print_debug(timestamp, " initialized a bullet going ", direction, " @ ", spawnPoint)
 			get_tree().get_root().add_child(newBullet)
-			print_debug(timestamp, " spawned a bullet going ", direction, " @ ", spawnPoint)
+			#print_debug(timestamp, " spawned a bullet going ", direction, " @ ", spawnPoint)
 			newBullet.position = spawnPoint
-			print_debug(timestamp, " bullet position is now ", spawnPoint)
+			#print_debug(timestamp, " bullet position is now ", spawnPoint)
 			canShoot = false
 			yield(get_tree().create_timer(shootCoolDown), "timeout")
 			canShoot = true
