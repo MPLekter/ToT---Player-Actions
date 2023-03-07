@@ -22,7 +22,7 @@ export var coyote_time_value := 0.4
 
 #slide related 
 export var slideTimer := 2.2
-var underCeiling := false
+var isTraversing := false
 var isSlowing := false
 var isSliding := false
 
@@ -34,6 +34,7 @@ export var slowingFactor_running := 1.000
 
 var motion := Vector2()
 var direction := Vector2()
+var traverseMotionValue := 0
 
 #shooting related
 export var shootCoolDown := 0.6
@@ -67,11 +68,9 @@ func applyTraversePointsLogic():
 	var allTraversePoints = get_tree().get_nodes_in_group("TraversePoint")
 	print_debug("There are ", allTraversePoints.size(), " traverse points in ", get_tree().get_current_scene().get_name())
 	for traversePoint in allTraversePoints:
-		traversePoint.connect("body_entered", self, "changeUnderCeilingState")
-		traversePoint.connect("body_exited", self, "changeUnderCeilingState")
-		#print_debug(traversePoint, " connected my signals")
-		#print_debug(traversePoint.is_connected("body_entered", self, "changeUnderCeilingState"))
-		
+		traversePoint.connect("body_entered", self, "changeisTraversingState")
+		traversePoint.connect("body_exited", self, "changeisTraversingState")
+
 func _physics_process(delta):
 	applyGravity()
 	getDirection()
@@ -89,7 +88,7 @@ func _physics_process(delta):
 		
 
 func handlePlayerState():
-	#idling state TODO: turn it on faster
+	#idling state 
 	if is_on_floor() and is_zero_approx(motion.x):
 		playerState = IDLE
 	#running state
@@ -141,7 +140,6 @@ func shootLogic():
 			
 func applyGunRotation():
 	var gun = $GunShape
-	var shootStartPoint = $GunShape/ShootStartPoint
 	match direction:
 		RIGHT:
 			gun.set_rotation_degrees(-90)
@@ -166,13 +164,14 @@ func getDirection():
 		#print_debug(timestamp, direction)
 		pass
 	
-func changeUnderCeilingState(body):
+func changeisTraversingState(body):
 	if body == self:
-		print_debug(timestamp, " STATE: underCeiling is now ", !underCeiling)
-		underCeiling = !underCeiling
-		if underCeiling == false:
+		print_debug(timestamp, " STATE: isTraversing is now ", !isTraversing)
+		isTraversing = !isTraversing
+		if isTraversing == false:
 			playerStandUp()
 		else:
+			traverseMotionValue = motion.x
 			playerSlide()
 
 			
@@ -197,20 +196,20 @@ func movementLogic():
 		#move no faster than maxSpeed
 		motion.x = clamp(motion.x, -maxSpeed, maxSpeed)
 		
-		if Input.is_action_pressed("player_right"):
-			motion.x += accelerationForce
-		elif Input.is_action_pressed("player_left"):
-			motion.x -= accelerationForce
-		else:
-			#if not holding movement buttons, slow down
-			#but only if not currently traversing
-			if not underCeiling:
+		if !isTraversing:
+			#only if not currently traversing
+			if Input.is_action_pressed("player_right"):
+				motion.x += accelerationForce
+			elif Input.is_action_pressed("player_left"):
+				motion.x -= accelerationForce
+			else:
+				#if not holding movement buttons, slow down
 				slowingLogic(slowingFactor_running)
+		elif isTraversing:
+			motion.x = traverseMotionValue
 		
 func slowingLogic(slowingFactor):
 	#slow down gradually
-	var currentMotionX = motion.x
-	var idleTreshold
 	motion.x = lerp(motion.x, 0, slowingFactor)
 	isSlowing = false
 	playerStandUp()
@@ -225,27 +224,27 @@ func slideLogic():
 	#use smaller collision shape
 	#when holding action, start slowing down gradually until no motion at all
 	#keep sliding position
-	#if underCeiling, don't do that, just keep sliding
+	#if isTraversing, don't do that, just keep sliding
 	
 	var isMoving = not is_zero_approx(motion.x)
 	#logic with slowing down
 	if Input.is_action_pressed("player_crouch"): 
 		if is_on_floor() and isMoving and not isSlowing:
 			#print_debug(timestamp, " STATE: started sliding")
-			var currentSpeed = motion.x
 			while Input.is_action_pressed("player_crouch"):
 				playerSlide()
 				isSliding = true
 #				#Keep checking for this as long as its pressed
-				if not underCeiling:
+				if not isTraversing:
 					isSlowing = true
 					#print_debug(timestamp, " STATE: finished sliding")
 					break
 				else:
+					#keep current speed. don't accelerate, don't slow down.
 					isSlowing = false
 					#print_debug(timestamp, " STATE: trying to stand up but still under a platform!")
 					break
-	if !Input.is_action_pressed("player_crouch") and not underCeiling:
+	if !Input.is_action_pressed("player_crouch") and not isTraversing:
 		isSliding = false
 				
 

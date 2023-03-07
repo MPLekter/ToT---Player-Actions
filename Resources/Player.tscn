@@ -1,7 +1,6 @@
-[gd_scene load_steps=34 format=2]
+[gd_scene load_steps=32 format=2]
 
 [ext_resource path="res://Scripts/PlayerMovement_2D platformer.gd" type="Script" id=1]
-[ext_resource path="res://Assets/crow.png" type="Texture" id=2]
 [ext_resource path="res://Assets/PrototypeHero.png" type="Texture" id=3]
 
 [sub_resource type="AtlasTexture" id=5]
@@ -39,10 +38,6 @@ region = Rect2( 600, 160, 100, 80 )
 [sub_resource type="AtlasTexture" id=13]
 atlas = ExtResource( 3 )
 region = Rect2( 700, 160, 100, 80 )
-
-[sub_resource type="AtlasTexture" id=31]
-atlas = ExtResource( 3 )
-region = Rect2( 200, 160, 100, 80 )
 
 [sub_resource type="AtlasTexture" id=32]
 atlas = ExtResource( 3 )
@@ -121,7 +116,7 @@ animations = [ {
 "name": "JUMP_DOWN",
 "speed": 5.0
 }, {
-"frames": [ SubResource( 31 ), SubResource( 32 ), SubResource( 33 ), SubResource( 34 ), SubResource( 35 ), SubResource( 36 ) ],
+"frames": [ SubResource( 32 ), SubResource( 33 ), SubResource( 34 ), SubResource( 35 ), SubResource( 36 ) ],
 "loop": true,
 "name": "JUMP_UP",
 "speed": 3.0
@@ -159,15 +154,8 @@ script = ExtResource( 1 )
 [node name="AnimatedSprite" type="AnimatedSprite" parent="." groups=["PLAYER_GROUP"]]
 position = Vector2( 0, -8 )
 frames = SubResource( 28 )
-animation = "RUNNING"
-frame = 1
+animation = "JUMP_UP"
 playing = true
-
-[node name="Sprite" type="Sprite" parent="." groups=["PLAYER_GROUP"]]
-visible = false
-scale = Vector2( 0.1, 0.1 )
-texture = ExtResource( 2 )
-flip_h = true
 
 [node name="StandingCollisionShape" type="CollisionShape2D" parent="." groups=["PLAYER_GROUP"]]
 shape = SubResource( 1 )
