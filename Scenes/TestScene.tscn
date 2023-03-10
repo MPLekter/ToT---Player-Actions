@@ -57,6 +57,7 @@ tile_data = PoolIntArray( -196585, 0, 0, -65560, 3, 0, -31, 3, 0, -65514, 2, 0, 
 
 [node name="Player" parent="." instance=ExtResource( 2 )]
 position = Vector2( 49, 282 )
+shootCoolDown = 0.5
 
 [node name="TraversePoints" type="Node" parent="."]
 

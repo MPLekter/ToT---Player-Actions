@@ -1,8 +1,9 @@
-[gd_scene load_steps=33 format=2]
+[gd_scene load_steps=34 format=2]
 
 [ext_resource path="res://Scripts/PlayerMovement_2D platformer.gd" type="Script" id=1]
 [ext_resource path="res://Assets/laserRed01.png" type="Texture" id=2]
 [ext_resource path="res://Assets/PrototypeHero.png" type="Texture" id=3]
+[ext_resource path="res://Scripts/CameraShake.gd" type="Script" id=4]
 
 [sub_resource type="AtlasTexture" id=5]
 atlas = ExtResource( 3 )
@@ -168,9 +169,10 @@ rotation = 1.5708
 shape = SubResource( 37 )
 disabled = true
 
-[node name="Camera2D" type="Camera2D" parent="." groups=["PLAYER_GROUP"]]
+[node name="ShakeCamera2D" type="Camera2D" parent="." groups=["PLAYER_GROUP"]]
 current = true
 smoothing_enabled = true
+script = ExtResource( 4 )
 
 [node name="GunShape" type="CollisionShape2D" parent="." groups=["PLAYER_GROUP"]]
 shape = SubResource( 3 )

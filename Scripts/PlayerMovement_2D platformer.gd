@@ -57,6 +57,9 @@ var SLIDING = possibleStates[4]
 
 var playerState = IDLE
 
+#camera related
+onready var camera = $ShakeCamera2D
+
 #debug related 
 var timestamp = Time.get_datetime_string_from_system()
 
@@ -151,10 +154,17 @@ func shootLogic():
 			get_tree().get_root().add_child(newBullet)
 			#print_debug(timestamp, " spawned a bullet going ", direction, " @ ", spawnPoint)
 
+			#try shake camera
+			shakeCamera()
+			
+			#
 			canShoot = false
 			yield(get_tree().create_timer(shootCoolDown), "timeout")
 			canShoot = true
 			
+func shakeCamera():
+	camera.shake(0.2, 15.0, 8.0)
+	
 func recoilLogic():
 	#make new array and add vectors normal, slightly up, slightly down
 	var spawnPositions = []
