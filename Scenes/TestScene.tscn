@@ -26,6 +26,16 @@ A Traverse point in place like this
 will suck player in, leaving no chance to leave
 07-03-2023"
 
+[node name="warning traverse point logic2" type="Label" parent="EDITOR-ONLY"]
+modulate = Color( 1, 0.129412, 0.129412, 1 )
+margin_left = 592.0
+margin_top = 192.0
+margin_right = 1033.0
+margin_bottom = 257.0
+text = "Check out:!
+When finishedtraversing right to left, you fall through platform. Why? 
+09-03-2023"
+
 [node name="TileMap_Non-passable objects" type="TileMap" parent="." groups=["NON-PASSABLE_LAYER"]]
 z_index = -1
 tile_set = ExtResource( 4 )

@@ -141,19 +141,37 @@ func dropThroughLogic():
 
 func shootLogic():
 	if Input.is_action_pressed("player_shoot"):
+		#check if can shoot
 		if canShoot:
-			var spawnPoint = $GunShape/ShootStartPoint.get_global_position()
+			#Recoil: determine spawnpoint at one of three possible positions
+			var recoil = recoilLogic()
+			var spawnPoint = $GunShape/ShootStartPoint.get_global_position() + recoil
 			var newBullet = bullet.instance()
 			newBullet.init(direction, spawnPoint)
-			#print_debug(timestamp, " initialized a bullet going ", direction, " @ ", spawnPoint)
 			get_tree().get_root().add_child(newBullet)
 			#print_debug(timestamp, " spawned a bullet going ", direction, " @ ", spawnPoint)
-			newBullet.position = spawnPoint
-			#print_debug(timestamp, " bullet position is now ", spawnPoint)
+
 			canShoot = false
 			yield(get_tree().create_timer(shootCoolDown), "timeout")
 			canShoot = true
 			
+func recoilLogic():
+	#make new array and add vectors normal, slightly up, slightly down
+	var spawnPositions = []
+	spawnPositions.append(Vector2.ZERO)
+	spawnPositions.append(Vector2(0, -1))
+	spawnPositions.append(Vector2(0, -2))
+	spawnPositions.append(Vector2(0, -3))
+	spawnPositions.append(Vector2(0, 1))
+	spawnPositions.append(Vector2(0, 2))
+	spawnPositions.append(Vector2(0, 3))
+	
+	#make sure seed is randomized
+	randomize()
+	#now pick any random vector from the array and return it to shootLogic function
+	var randomizedPosition = spawnPositions[randi() % spawnPositions.size()]
+	return randomizedPosition
+	
 func applyGunRotation():
 	var gun = $GunShape
 	match direction:
