@@ -156,6 +156,7 @@ script = ExtResource( 1 )
 position = Vector2( 0, -8 )
 frames = SubResource( 28 )
 animation = "IDLE"
+frame = 3
 playing = true
 
 [node name="StandingCollisionShape" type="CollisionShape2D" parent="." groups=["PLAYER_GROUP"]]
@@ -192,6 +193,13 @@ collision_mask = 6
 [node name="CollisionShape2D" type="CollisionShape2D" parent="DropThroughCheck" groups=["PLAYER_GROUP"]]
 position = Vector2( 0, 30 )
 shape = SubResource( 4 )
+
+[node name="EDITOR_ONLY_stateLabel" type="Label" parent="."]
+margin_left = -33.0
+margin_top = -32.0
+margin_right = 36.0
+margin_bottom = -18.0
+text = "state: IDLE"
 
 [connection signal="body_entered" from="DropThroughCheck" to="." method="_on_DropThroughCheck_body_entered"]
 [connection signal="body_exited" from="DropThroughCheck" to="." method="_on_DropThroughCheck_body_exited"]

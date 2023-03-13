@@ -67,6 +67,7 @@ onready var camera = $ShakeCamera2D
 
 #debug related 
 var timestamp = Time.get_datetime_string_from_system()
+onready var stateLabel = $EDITOR_ONLY_stateLabel
 
 func _ready():
 	direction = RIGHT
@@ -147,6 +148,9 @@ func handlePlayerAnimation(playerState):
 	else:
 		ani.set_rotation_degrees(0)
 		ani.set_position(Vector2(0, -8))
+	
+	#show animation in label
+	stateLabel.text = "animation: " + playerState
 	
 func dropThroughLogic():
 	if canDrop == true:
