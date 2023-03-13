@@ -34,11 +34,14 @@ export var slowingFactor_running := 1.000
 
 var motion := Vector2()
 var direction := Vector2()
+var lastDirectionHorizontal := Vector2()
 var traverseMotionValue := 0
 
 #shooting related
 export var shootCoolDown := 0.6
 var canShoot := true
+var isAimingUp := false
+var isAimingDown := false
 onready var bullet = preload("res://Resources/Bullet.tscn")
 
 #dropping through related
@@ -48,12 +51,14 @@ var canDrop := false
 onready var ani = $AnimatedSprite
 
 #state logic related
-const possibleStates = ["IDLE", "RUNNING", "JUMP_UP", "JUMP_DOWN", "SLIDING"]
+const possibleStates = ["IDLE", "RUNNING", "JUMP_UP", "JUMP_DOWN", "SLIDING", "AIM_UP", "AIM_DOWN"]
 var IDLE = possibleStates[0]
 var RUNNING = possibleStates[1]
 var JUMP_UP = possibleStates[2]
 var JUMP_DOWN = possibleStates[3]
 var SLIDING = possibleStates[4]
+var AIM_UP = possibleStates[5]
+var AIM_DOWN = possibleStates[6]
 
 var playerState = IDLE
 
@@ -65,6 +70,8 @@ var timestamp = Time.get_datetime_string_from_system()
 
 func _ready():
 	direction = RIGHT
+	lastDirectionHorizontal = RIGHT
+	
 	applyTraversePointsLogic()
 	
 func applyTraversePointsLogic():
@@ -102,22 +109,28 @@ func handlePlayerCollisionShape():
 			playerCollisionStandUp()
 			
 func handlePlayerState():
-	#idling state 
-	if is_on_floor() and motion.x == 0 and isSliding != true and isTraversing != true:
-		playerState = IDLE
-	#running state
-	elif is_on_floor() and motion.x >= (3 * accelerationForce) and isSliding != true and isTraversing != true:
-		playerState = RUNNING
-	elif is_on_floor() and motion.x <= (-3 * accelerationForce) and isSliding != true and isTraversing != true:
-		playerState = RUNNING
-	#sliding state
-	elif is_on_floor() and isSliding == true or isTraversing == true:
-		playerState = SLIDING
-	#jumping state TODO: check if going up or down, apply animation
-	elif not is_on_floor() and motion.y >= accelerationForce:
-		playerState = JUMP_UP
-	elif not is_on_floor() and motion.y <= -accelerationForce:
-		playerState = JUMP_UP
+	#aiming vertical
+	if isAimingUp == true:
+		playerState = AIM_UP
+	elif isAimingDown == true:
+		playerState = AIM_DOWN
+	else:
+		#idling state 
+		if is_on_floor() and motion.x == 0 and isSliding != true and isTraversing != true:
+			playerState = IDLE
+		#running state
+		elif is_on_floor() and motion.x >= (3 * accelerationForce) and isSliding != true and isTraversing != true:
+			playerState = RUNNING
+		elif is_on_floor() and motion.x <= (-3 * accelerationForce) and isSliding != true and isTraversing != true:
+			playerState = RUNNING
+		#sliding state
+		elif is_on_floor() and isSliding == true or isTraversing == true:
+			playerState = SLIDING
+		#jumping state TODO: check if going up or down, apply animation
+		elif not is_on_floor() and motion.y >= accelerationForce:
+			playerState = JUMP_UP
+		elif not is_on_floor() and motion.y <= -accelerationForce:
+			playerState = JUMP_UP
 		
 func handlePlayerAnimation(playerState):
 	#play anim
@@ -196,14 +209,32 @@ func applyGunRotation():
 	
 func getDirection():
 	var lastdirection = direction
+
 	if Input.is_action_pressed("player_left"):
 		direction = LEFT
+		lastDirectionHorizontal = LEFT
 	elif Input.is_action_pressed("player_right"):
 		direction = RIGHT
-	elif Input.is_action_pressed("player_down"):
+		lastDirectionHorizontal = RIGHT
+		
+	#as long as holding up or down, the direction is X
+	while Input.is_action_pressed("player_down"):
+		isAimingDown = true
 		direction = DOWN
-	elif Input.is_action_pressed("player_up"):
+		break
+	while Input.is_action_pressed("player_up"):
+		isAimingUp = true
 		direction = UP
+		break
+		
+	#once you release it, direction is lastly used horizontal
+	if Input.is_action_just_released("player_down") or Input.is_action_just_released("player_up"):
+			isAimingUp = false
+			isAimingDown = false
+			direction = lastDirectionHorizontal
+
+		
+	#TODO: check if needed anymore
 	if direction != lastdirection:
 		#print_debug(timestamp, direction)
 		pass
