@@ -196,13 +196,13 @@ func applyGunRotation():
 	
 func getDirection():
 	var lastdirection = direction
-	if Input.is_action_just_pressed("player_left"):
+	if Input.is_action_pressed("player_left"):
 		direction = LEFT
-	elif Input.is_action_just_pressed("player_right"):
+	elif Input.is_action_pressed("player_right"):
 		direction = RIGHT
-	elif Input.is_action_just_pressed("player_down"):
+	elif Input.is_action_pressed("player_down"):
 		direction = DOWN
-	elif Input.is_action_just_pressed("player_up"):
+	elif Input.is_action_pressed("player_up"):
 		direction = UP
 	if direction != lastdirection:
 		#print_debug(timestamp, direction)
