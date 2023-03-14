@@ -98,7 +98,7 @@ func _physics_process(delta):
 	dropThroughLogic()
 	
 	handlePlayerState()
-	handlePlayerAnimation(playerState)
+	flipPlayerAnimation(playerState)
 		
 func handlePlayerCollisionShape():
 	if isTraversing:
@@ -133,7 +133,7 @@ func handlePlayerState():
 		elif not is_on_floor() and motion.y <= -accelerationForce:
 			playerState = JUMP_UP
 		
-func handlePlayerAnimation(playerState):
+func flipPlayerAnimation(playerState):
 	#play anim
 	ani.play(playerState)
 	#direction logic
@@ -174,13 +174,13 @@ func shootLogic():
 			#try shake camera
 			shakeCamera()
 			
-			#
+			#wait until ready to shoot again
 			canShoot = false
 			yield(get_tree().create_timer(shootCoolDown), "timeout")
 			canShoot = true
 			
 func shakeCamera():
-	camera.shake(0.2, 15.0, 8.0)
+	camera.shake(0.2, 15.0, 8.0) #these values are somewhat random
 	
 func recoilLogic():
 	#make new array and add vectors normal, slightly up, slightly down
@@ -199,7 +199,7 @@ func recoilLogic():
 	var randomizedPosition = spawnPositions[randi() % spawnPositions.size()]
 	return randomizedPosition
 	
-func applyGunRotation():
+func applyGunRotation(): #TODO: possibly this will not be needed anymore?
 	var gun = $GunShape
 	match direction:
 		RIGHT:
@@ -221,12 +221,13 @@ func getDirection():
 		direction = RIGHT
 		lastDirectionHorizontal = RIGHT
 		
-	#as long as holding up or down, the direction is X
-	while Input.is_action_pressed("player_down"):
+	#as long as holding up or down, the direction is up or down.
+	#but it won't happen if you are running at the same time.
+	while Input.is_action_pressed("player_down") and not playerState == RUNNING:
 		isAimingDown = true
 		direction = DOWN
 		break
-	while Input.is_action_pressed("player_up"):
+	while Input.is_action_pressed("player_up") and not playerState == RUNNING:
 		isAimingUp = true
 		direction = UP
 		break
@@ -267,20 +268,24 @@ func movementLogic():
 	if isSlowing:
 		slowingLogic(slowingFactor_sliding)
 	else:
-		#move no faster than maxSpeed
-		motion.x = clamp(motion.x, -maxSpeed, maxSpeed)
-		
-		if !isTraversing:
-			#only if not currently traversing
-			if Input.is_action_pressed("player_right"):
-				motion.x += accelerationForce
-			elif Input.is_action_pressed("player_left"):
-				motion.x -= accelerationForce
-			else:
-				#if not holding movement buttons, slow down
-				slowingLogic(slowingFactor_running)
-		elif isTraversing:
-			motion.x = traverseMotionValue
+		#you can't move when you are on ground and aiming up or down
+		if is_on_floor() and isAimingUp or isAimingDown:
+			motion.x == 0
+		else:
+			#move no faster than maxSpeed
+			motion.x = clamp(motion.x, -maxSpeed, maxSpeed)
+			
+			if !isTraversing:
+				#only if not currently traversing
+				if Input.is_action_pressed("player_right"):
+					motion.x += accelerationForce
+				elif Input.is_action_pressed("player_left"):
+					motion.x -= accelerationForce
+				else:
+					#if not holding movement buttons, slow down
+					slowingLogic(slowingFactor_running)
+			elif isTraversing:
+				motion.x = traverseMotionValue
 		
 func slowingLogic(slowingFactor):
 	#slow down gradually
